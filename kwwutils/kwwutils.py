@@ -12,7 +12,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.chat_models import ChatOllama
+from langchain_community.chat_models.ollama import ChatOllama
 from langchain_community.document_loaders import (
     CSVLoader,
     DirectoryLoader,
@@ -67,7 +67,26 @@ def clock(func):
         return result
     return clocked
 
-    
+
+def aclock(func):
+    @functools.wraps(func)
+    async def clocked(*args, **kwargs):
+        t0 = time.time()
+        result = await func(*args, **kwargs)
+        elapsed = time.time() - t0
+        arg_list = []
+        arg_types = str, int, float, complex, tuple, list, dict, set
+        if args and len(args) > 1:
+            arg_list.append(', '.join(repr(arg) for arg in args if isinstance(arg, (arg_types))))
+        if kwargs:
+            pairs = ['%s=%r' % (k, w) for k, w in sorted(kwargs.items())]
+            arg_list.append(', '.join(pairs))
+        arg_str = ', '.join(arg_list)
+        print('[%0.4fs] %s(%s) -> %r ' % (elapsed, func.__name__, arg_str, reprlib.repr(result)))
+        return result
+    return clocked
+
+
 def execute(func):
     """
     Decorator used in executing a function
@@ -261,6 +280,7 @@ def printit(label, values):
 @clock
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
+
 
 def get_persist_directory(options):
     return f"{options['persist_directory']}_{options['embedding']}"

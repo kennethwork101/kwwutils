@@ -7,12 +7,16 @@ import time
 import traceback
 from pprint import pformat
 
+
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.chat_models.ollama import ChatOllama
+#from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
+from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.chat_models.ollama import ChatOllama
 from langchain_community.document_loaders import (
     CSVLoader,
     DirectoryLoader,
@@ -25,7 +29,6 @@ from langchain_community.embeddings import (
     GPT4AllEmbeddings,
     HuggingFaceInstructEmbeddings,
 )
-from langchain_community.llms import Ollama
 from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -125,7 +128,8 @@ def get_llm(options):
     options: model, llm_type, temperature
     """
     if options['llm_type'] == "llm":
-        llm = Ollama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+#       llm = Ollama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+        llm = OllamaLLM(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     elif options['llm_type'] == "chat":
         llm = ChatOllama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     return llm

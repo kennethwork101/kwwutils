@@ -7,34 +7,30 @@ import time
 import traceback
 from pprint import pformat
 
-
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+# LLM and Chat Models
 from langchain_community.chat_models.ollama import ChatOllama
-#from langchain_community.llms import Ollama
-from langchain_ollama import OllamaLLM
+# Document Loaders
+from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
+    WebBaseLoader
+# Embeddings
+from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceInstructEmbeddings, \
+    SentenceTransformerEmbeddings
+from langchain_community.llms.ollama import Ollama  # Updated Ollama import
+# Vector Stores
 from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.indexes import VectorstoreIndexCreator
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import (
-    CSVLoader,
-    DirectoryLoader,
-    JSONLoader,
-    PyPDFLoader,
-    TextLoader,
-    WebBaseLoader,
-)
-from langchain_community.embeddings import (
-    GPT4AllEmbeddings,
-    HuggingFaceInstructEmbeddings,
-)
-from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
+# LangChain Core Imports
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+# Transformers
 from transformers import AutoTokenizer
+
+# Callbacks
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+# Text Splitting
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 loaders_map = {
     ".pdf": PyPDFLoader,
@@ -128,8 +124,7 @@ def get_llm(options):
     options: model, llm_type, temperature
     """
     if options['llm_type'] == "llm":
-#       llm = Ollama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
-        llm = OllamaLLM(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+        llm = Ollama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     elif options['llm_type'] == "chat":
         llm = ChatOllama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     return llm

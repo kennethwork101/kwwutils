@@ -1,5 +1,7 @@
 __version__ = 'dev'
 
+
+
 import functools
 import os
 import reprlib
@@ -7,30 +9,21 @@ import time
 import traceback
 from pprint import pformat
 
-# LLM and Chat Models
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.indexes import VectorstoreIndexCreator
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.chat_models.ollama import ChatOllama
-# Document Loaders
 from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
     WebBaseLoader
-# Embeddings
 from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceInstructEmbeddings, \
     SentenceTransformerEmbeddings
-from langchain_community.llms.ollama import Ollama  # Updated Ollama import
-# Vector Stores
+from langchain_community.llms.ollama import Ollama
 from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
-# LangChain Core Imports
-from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
-# Transformers
 from transformers import AutoTokenizer
-
-# Callbacks
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-# Text Splitting
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 loaders_map = {
     ".pdf": PyPDFLoader,
@@ -362,6 +355,9 @@ def create_rag_chain_with_sources(chat_llm, retriever, prompt=qa_system_prompt):
         | output_parser
     )
     rag_chain_with_sources = RunnableParallel(
+        {"context": retriever, "question": RunnablePassthrough()}
+    ).assign(answer=rag_chain_from_docs)
+    return rag_chain_with_sources
         {"context": retriever, "question": RunnablePassthrough()}
     ).assign(answer=rag_chain_from_docs)
     return rag_chain_with_sources

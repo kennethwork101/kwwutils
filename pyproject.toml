@@ -1,17 +1,17 @@
 [tool.poetry]
 name = "kwwutils"
-version = "0.1.7"
+version = "0.1.8"
 description = "General utilities working with Ollama and Langchain"
 authors = ["Kenneth Wong <kennethwork101@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-langchain = "^0.1.13"
-transformers = "^4.39.2"
-tensorflow = "^2.16.1"
-langchain-ollama = "^0.2.1"
-langchain-community = "^0.3.11"
+langchain = "*"
+transformers = "*"
+tensorflow = "*"
+langchain-ollama = "*"
+langchain-community = "*"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,7 +1,6 @@
 __version__ = 'dev'
 
 
-
 import functools
 import os
 import reprlib
@@ -342,6 +341,7 @@ def create_rag_chain_with_chat_history(chat_llm, retriever):
     return rag_chain_chat_history
 
 
+
 @clock
 def create_rag_chain_with_sources(chat_llm, retriever, prompt=qa_system_prompt):
     """
@@ -355,9 +355,6 @@ def create_rag_chain_with_sources(chat_llm, retriever, prompt=qa_system_prompt):
         | output_parser
     )
     rag_chain_with_sources = RunnableParallel(
-        {"context": retriever, "question": RunnablePassthrough()}
-    ).assign(answer=rag_chain_from_docs)
-    return rag_chain_with_sources
         {"context": retriever, "question": RunnablePassthrough()}
     ).assign(answer=rag_chain_from_docs)
     return rag_chain_with_sources

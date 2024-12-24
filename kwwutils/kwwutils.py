@@ -12,23 +12,21 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.chat_models.ollama import ChatOllama
 from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
     WebBaseLoader
 from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceInstructEmbeddings, \
     SentenceTransformerEmbeddings
-from langchain_community.llms.ollama import Ollama
 from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_ollama import ChatOllama, OllamaLLM
 from transformers import AutoTokenizer
 
 loaders_map = {
-    ".pdf": PyPDFLoader,
     ".csv": CSVLoader,
-    ".txt": TextLoader,
     ".json": JSONLoader,
+    ".pdf": PyPDFLoader,
+    ".txt": TextLoader,
+    ".md": TextLoader,
+    ".ini": TextLoader,
 }
 
 vectorstore_map = {
@@ -37,7 +35,6 @@ vectorstore_map = {
     "DocArrayInMemorySearch": DocArrayInMemorySearch,
 }
 
-tokenizer = AutoTokenizer.from_pretrained("google/flan-ul2")
 
 
 def clock(func):
@@ -116,7 +113,7 @@ def get_llm(options):
     options: model, llm_type, temperature
     """
     if options['llm_type'] == "llm":
-        llm = Ollama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+        llm = OllamaLLM(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     elif options['llm_type'] == "chat":
         llm = ChatOllama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
     return llm
@@ -124,7 +121,7 @@ def get_llm(options):
 
 @clock
 def get_documents_by_path(pathname):
-    """ 
+    """
     Retrieve the documents based on pathname
     options: pathname
     """
@@ -143,7 +140,7 @@ def get_documents_by_path(pathname):
 
 @clock
 def create_memory_vectordb(options):
-    """ 
+    """
     Store the documents in an in-mmeory vectorstore based on the pathname 
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
@@ -156,7 +153,7 @@ def create_memory_vectordb(options):
 
 @clock
 def create_disk_vectordb(options, index_flag=False):
-    """ 
+    """
     Store the documents in an in-disk vectorstore based on the pathname
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
@@ -178,7 +175,7 @@ def create_disk_vectordb(options, index_flag=False):
 
 @clock
 def create_vectordb(options, index_flag=False):
-    """ 
+    """
     Create a vectordb with data pointed to by pathname.
     The supported vectordb_type is disk or memory.
     On default return the newly created vectordb or we can return the index if index_flag is set to True.
@@ -189,7 +186,7 @@ def create_vectordb(options, index_flag=False):
 
 @clock
 def create_vectordb_all(options, index_flag=False):
-    """ 
+    """
     Create all vectordb with data pointed to by embeddings and pathname. Supported embeddings are: chroma, gpt4all.
     """ 
     vectordbs = []
@@ -226,10 +223,9 @@ def get_embeddings(options):
     if embedding == "chroma":
         embedding = SentenceTransformerEmbeddings() if embedmodel is None else SentenceTransformerEmbeddings(model_name=embedmodel)
     elif embedding == "gpt4all":
-        embedding = GPT4AllEmbeddings() if embedmodel is None else GPT4AllEmbeddings(model_name=embedmodel)
+        embedding = GPT4AllEmbeddings()
     elif embedding == "huggingface":
-        embedding = HuggingFaceInstructEmbeddings() if embedmodel is None else HuggingFaceInstructEmbeddings(
-            model_name=embedmodel, model_kwargs={"device": "cuda"})
+        embedding = HuggingFaceInstructEmbeddings()
     else:
         print(f"Error: Unsupported embedding {embedding}")
         os._exit(1)
@@ -282,6 +278,7 @@ def count_tokens(values):
     """ 
     Count the number of tokens
     """
+    tokenizer = AutoTokenizer.from_pretrained("google/flan-ul2")
     if isinstance(values, str):
         cnt = len(tokenizer.tokenize(values))
     elif isinstance(values, dict):
@@ -289,72 +286,3 @@ def count_tokens(values):
     else:
         raise RuntimeError("count_token received Bad value")
     return cnt
-
-
-qa_system_prompt = """
-You are an assistant for question-answering tasks.
-Use the following pieces of retrieved context to answer the question.
-If you don't know the answer, just say that you don't know.
-Use three sentences maximum and keep the answer concise.
-{context}
-"""
-        
-
-@clock
-def create_rag_chain_with_chat_history(chat_llm, retriever):
-    """
-    Returns rag chain with chat history
-    """
-
-    def contextualized_question(input: dict):
-        if input.get("chat_history"):
-            return contextualize_q_chain
-        else:
-            return input["question"]
-
-
-    contextualize_q_system_prompt = """
-    Given a chat history and the latest user question
-    which might reference context in the chat history, formulate a standalone question
-    which can be understood without the chat history. Do NOT answer the question,
-    just reformulate it if needed and otherwise return it as is.
-    """
-
-    output_parser = StrOutputParser()
-    contextualize_q_prompt = ChatPromptTemplate.from_messages([
-            ("system", contextualize_q_system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{question}"),
-    ])
-    contextualize_q_chain = contextualize_q_prompt | chat_llm | output_parser
-
-    qa_prompt = ChatPromptTemplate.from_messages([
-            ("system", qa_system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{question}"),
-    ])
-    rag_chain_chat_history = (
-        RunnablePassthrough.assign(context=contextualized_question | retriever | format_docs)
-        | qa_prompt
-        | chat_llm
-    )
-    return rag_chain_chat_history
-
-
-
-@clock
-def create_rag_chain_with_sources(chat_llm, retriever, prompt=qa_system_prompt):
-    """
-    Returns rag chain with sources
-    """
-    output_parser = StrOutputParser()
-    rag_chain_from_docs = (
-        RunnablePassthrough.assign(context=lambda x: format_docs(x["context"]))
-        | prompt
-        | chat_llm
-        | output_parser
-    )
-    rag_chain_with_sources = RunnableParallel(
-        {"context": retriever, "question": RunnablePassthrough()}
-    ).assign(answer=rag_chain_from_docs)
-    return rag_chain_with_sources

@@ -5,6 +5,8 @@
 .git/
 *.ipynb
 *log
+data/
+dist/
 mydb/
 out*
 *png

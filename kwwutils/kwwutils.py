@@ -12,9 +12,19 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
-    WebBaseLoader
-from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceEmbeddings, SentenceTransformerEmbeddings
+from langchain_community.document_loaders import (
+    CSVLoader,
+    DirectoryLoader,
+    JSONLoader,
+    PyPDFLoader,
+    TextLoader,
+    WebBaseLoader,
+)
+from langchain_community.embeddings import (
+    GPT4AllEmbeddings,
+    HuggingFaceEmbeddings,
+    SentenceTransformerEmbeddings,
+)
 from langchain_community.vectorstores import FAISS, DocArrayInMemorySearch
 from langchain_core.callbacks.manager import CallbackManager
 from langchain_ollama import ChatOllama, OllamaLLM
@@ -139,10 +149,7 @@ def get_llm(options):
         llm = ChatOllama(
             model=options["model"],
             temperature=options["temperature"],
-            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
-        )
-    return llm
-
+            callback_manager=CallbackManager([StreamingStdOu  
 
 @clock
 def get_documents_by_path(pathname):
@@ -244,9 +251,9 @@ def get_vectordb(options):
 @clock
 def get_embeddings(options):
     """
-    Retrieve the model embedding based on the embedding type
-    options: embedding, embedmodel
-#           else GPT4AllEmbeddings(model_name=embedmodel)
+        Retrieve the model embedding based on the embedding type
+        options: embedding, embedmodel
+    #           else GPT4AllEmbeddings(model_name=embedmodel)
     """
     embedding = options["embedding"]
     embedmodel = options["embedmodel"]
@@ -257,16 +264,12 @@ def get_embeddings(options):
             else SentenceTransformerEmbeddings(model_name=embedmodel)
         )
     elif embedding == "gpt4all":
-        embedmodel= "all-MiniLM-L6-v2.gguf2.f16.gguf"
-        gpt4all_kwargs = {'allow_download': 'True'}
+        embedmodel = "all-MiniLM-L6-v2.gguf2.f16.gguf"
+        gpt4all_kwargs = {"allow_download": "True"}
         embedding = (
             GPT4AllEmbeddings()
             if embedmodel is None
-            else GPT4AllEmbeddings(
-                model_name=embedmodel,
-                gpt4all_kwargs=gpt4all_kwargs
-            )
-
+            else GPT4AllEmbeddings(model_name=embedmodel, gpt4all_kwargs=gpt4all_kwargs)
         )
     elif embedding == "huggingface":
         embedding = (

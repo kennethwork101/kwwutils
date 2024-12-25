@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kwwutils"
-version = "0.1.10"
+version = "0.1.11"
 description = "General utilities working with Ollama and Langchain"
 authors = ["Kenneth Wong <kennethwork101@gmail.com>"]
 readme = "README.md"
@@ -19,6 +19,8 @@ langchain = "^0.3.13"
 tensorflow = "^2.18.0"
 langchain-ollama = "^0.2.2"
 langchain-community = "^0.3.13"
+langchain-huggingface = "^0.1.2"
+langchain-core = "^0.3.28"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -3,8 +3,15 @@ import os
 import pytest
 from langchain.prompts import ChatPromptTemplate
 
-from kwwutils.kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, \
-    printit
+from kwwutils.kwwutils import (
+    clock,
+    count_tokens,
+    create_vectordb,
+    get_documents_by_path,
+    get_embeddings,
+    get_llm,
+    printit,
+)
 
 
 @clock
@@ -107,12 +114,11 @@ def test_create_vectordb(options, model):
 
 
 @pytest.mark.testme
+@pytest.mark.parametrize("embedding", ["chroma", "gpt4all", "huggingface"])
 @clock
-def test_get_embeddings(options, model):
+def test_get_embeddings(options, model, embedding):
     printit("options", options)
     printit("model", model)
-    options["embedding"] = "gpt4all"
-#   options["embedding"] = "huggingface"
-    options["embedding"] = "chroma"
+    options["embedding"] = embedding
     embedding = get_embeddings(options)
     printit("embedding", embedding)

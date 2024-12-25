@@ -1,4 +1,4 @@
-__version__ = 'dev'
+__version__ = "dev"
 
 
 import functools
@@ -8,15 +8,15 @@ import time
 import traceback
 from pprint import pformat
 
-from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
 from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
     WebBaseLoader
-from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceInstructEmbeddings, \
-    SentenceTransformerEmbeddings
-from langchain_community.vectorstores import FAISS, Chroma, DocArrayInMemorySearch
+from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceEmbeddings, SentenceTransformerEmbeddings
+from langchain_community.vectorstores import FAISS, DocArrayInMemorySearch
+from langchain_core.callbacks.manager import CallbackManager
 from langchain_ollama import ChatOllama, OllamaLLM
 from transformers import AutoTokenizer
 
@@ -36,7 +36,6 @@ vectorstore_map = {
 }
 
 
-
 def clock(func):
     @functools.wraps(func)
     def clocked(*args, **kwargs):
@@ -46,13 +45,19 @@ def clock(func):
         arg_list = []
         arg_types = str, int, float, complex, tuple, list, dict, set
         if args and len(args) > 1:
-            arg_list.append(', '.join(repr(arg) for arg in args if isinstance(arg, (arg_types))))
+            arg_list.append(
+                ", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types)))
+            )
         if kwargs:
-            pairs = ['%s=%r' % (k, w) for k, w in sorted(kwargs.items())]
-            arg_list.append(', '.join(pairs))
-        arg_str = ', '.join(arg_list)
-        print('[%0.4fs] %s(%s) -> %r ' % (elapsed, func.__name__, arg_str, reprlib.repr(result)))
+            pairs = ["%s=%r" % (k, w) for k, w in sorted(kwargs.items())]
+            arg_list.append(", ".join(pairs))
+        arg_str = ", ".join(arg_list)
+        print(
+            "[%0.4fs] %s(%s) -> %r "
+            % (elapsed, func.__name__, arg_str, reprlib.repr(result))
+        )
         return result
+
     return clocked
 
 
@@ -65,13 +70,19 @@ def aclock(func):
         arg_list = []
         arg_types = str, int, float, complex, tuple, list, dict, set
         if args and len(args) > 1:
-            arg_list.append(', '.join(repr(arg) for arg in args if isinstance(arg, (arg_types))))
+            arg_list.append(
+                ", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types)))
+            )
         if kwargs:
-            pairs = ['%s=%r' % (k, w) for k, w in sorted(kwargs.items())]
-            arg_list.append(', '.join(pairs))
-        arg_str = ', '.join(arg_list)
-        print('[%0.4fs] %s(%s) -> %r ' % (elapsed, func.__name__, arg_str, reprlib.repr(result)))
+            pairs = ["%s=%r" % (k, w) for k, w in sorted(kwargs.items())]
+            arg_list.append(", ".join(pairs))
+        arg_str = ", ".join(arg_list)
+        print(
+            "[%0.4fs] %s(%s) -> %r "
+            % (elapsed, func.__name__, arg_str, reprlib.repr(result))
+        )
         return result
+
     return clocked
 
 
@@ -80,6 +91,7 @@ def execute(func):
     Decorator used in executing a function
     options: embedding, model, models, repeatcnt
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         options = kwargs
@@ -87,12 +99,14 @@ def execute(func):
         if "options" in options:
             options = options["options"]
         elapsed = None
-        if options['model'] is not None:
-            options['models'] = [options['model']]
-        for i in range(options['repeatcnt']):
-            for model in options['models']:
-                options['model'] = model
-                print(f"\n\n\n{'='*80}\ni {i}: model: {model} embedding: {options['embedding']}\n{'-'*80}")
+        if options["model"] is not None:
+            options["models"] = [options["model"]]
+        for i in range(options["repeatcnt"]):
+            for model in options["models"]:
+                options["model"] = model
+                print(
+                    f"\n\n\n{'='*80}\ni {i}: model: {model} embedding: {options['embedding']}\n{'-'*80}"
+                )
                 try:
                     t0 = time.time()
                     result = func(options)
@@ -101,8 +115,11 @@ def execute(func):
                     print(f"\n\n\n>>>-error<<<: {e}")
                     traceback.print_exception(type(e), e, e.__traceback__)
                     result = None
-                print(f"\n{'-'*80}\ni {i}: model: {model} embedding: {options['embedding']} {elapsed} seconds\n{'='*80}\n\n\n")
+                print(
+                    f"\n{'-'*80}\ni {i}: model: {model} embedding: {options['embedding']} {elapsed} seconds\n{'='*80}\n\n\n"
+                )
         return result
+
     return wrapper
 
 
@@ -112,10 +129,18 @@ def get_llm(options):
     Create an instance of llm using Ollama based on the name of the model
     options: model, llm_type, temperature
     """
-    if options['llm_type'] == "llm":
-        llm = OllamaLLM(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
-    elif options['llm_type'] == "chat":
-        llm = ChatOllama(model=options['model'], temperature=options['temperature'], callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+    if options["llm_type"] == "llm":
+        llm = OllamaLLM(
+            model=options["model"],
+            temperature=options["temperature"],
+            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+        )
+    elif options["llm_type"] == "chat":
+        llm = ChatOllama(
+            model=options["model"],
+            temperature=options["temperature"],
+            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+        )
     return llm
 
 
@@ -141,7 +166,7 @@ def get_documents_by_path(pathname):
 @clock
 def create_memory_vectordb(options):
     """
-    Store the documents in an in-mmeory vectorstore based on the pathname 
+    Store the documents in an in-mmeory vectorstore based on the pathname
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
     docs = get_documents_by_path(options["pathname"])
@@ -181,18 +206,22 @@ def create_vectordb(options, index_flag=False):
     On default return the newly created vectordb or we can return the index if index_flag is set to True.
     """
     vectordb_type = options["vectordb_type"]
-    return create_disk_vectordb(options, index_flag) if vectordb_type == "disk" else create_memory_vectordb(options)
+    return (
+        create_disk_vectordb(options, index_flag)
+        if vectordb_type == "disk"
+        else create_memory_vectordb(options)
+    )
 
 
 @clock
 def create_vectordb_all(options, index_flag=False):
     """
     Create all vectordb with data pointed to by embeddings and pathname. Supported embeddings are: chroma, gpt4all.
-    """ 
+    """
     vectordbs = []
     for embedding in options["embeddings"]:
         options["embedding"] = embedding
-        vectordb = create_vectordb(options) 
+        vectordb = create_vectordb(options)
         vectordbs.append(vectordb)
     return vectordbs
 
@@ -217,15 +246,36 @@ def get_embeddings(options):
     """
     Retrieve the model embedding based on the embedding type
     options: embedding, embedmodel
+#           else GPT4AllEmbeddings(model_name=embedmodel)
     """
-    embedding = options['embedding']
-    embedmodel = options['embedmodel']
+    embedding = options["embedding"]
+    embedmodel = options["embedmodel"]
     if embedding == "chroma":
-        embedding = SentenceTransformerEmbeddings() if embedmodel is None else SentenceTransformerEmbeddings(model_name=embedmodel)
+        embedding = (
+            SentenceTransformerEmbeddings()
+            if embedmodel is None
+            else SentenceTransformerEmbeddings(model_name=embedmodel)
+        )
     elif embedding == "gpt4all":
-        embedding = GPT4AllEmbeddings()
+        embedmodel= "all-MiniLM-L6-v2.gguf2.f16.gguf"
+        gpt4all_kwargs = {'allow_download': 'True'}
+        embedding = (
+            GPT4AllEmbeddings()
+            if embedmodel is None
+            else GPT4AllEmbeddings(
+                model_name=embedmodel,
+                gpt4all_kwargs=gpt4all_kwargs
+            )
+
+        )
     elif embedding == "huggingface":
-        embedding = HuggingFaceInstructEmbeddings()
+        embedding = (
+            HuggingFaceEmbeddings()
+            if embedmodel is None
+            else HuggingFaceEmbeddings(
+                model_name=embedmodel, model_kwargs={"device": "cuda"}
+            )
+        )
     else:
         print(f"Error: Unsupported embedding {embedding}")
         os._exit(1)
@@ -237,7 +287,10 @@ def get_loaders_by_dir(dir_path):
     """
     Retrieve the loader for pdf, csv and txt
     """
-    loaders = [DirectoryLoader(dir_path, glob=f"**/*{key}", loader_cls=loaders_map[key]) for key in loaders_map]
+    loaders = [
+        DirectoryLoader(dir_path, glob=f"**/*{key}", loader_cls=loaders_map[key])
+        for key in loaders_map
+    ]
     return loaders
 
 
@@ -247,21 +300,30 @@ def _get_documents_by_dir(dir_path):
     Retrieve the list of documents based on the file path of the directory
     Returns a list of Document
     """
-    loaders = [DirectoryLoader(dir_path, glob=f"**/*{key}", loader_cls=loaders_map[key]) for key in loaders_map]
+    loaders = [
+        DirectoryLoader(dir_path, glob=f"**/*{key}", loader_cls=loaders_map[key])
+        for key in loaders_map
+    ]
     documents = [loader.load() for loader in loaders]
     docs = []
     for doc in documents:
         docs.extend(doc)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=100, separators=["\n\n", "\n", "\. ", " ", ""])
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=2000, chunk_overlap=100, separators=["\n\n", "\n", "\. ", " ", ""]
+    )
     texts = text_splitter.split_documents(documents=docs)
     return texts
 
 
 def printit(label, values):
     try:
-        print(f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\nlen: {len(values)}\n{'-' * 80}\n{'#-' * 40}\n")
+        print(
+            f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\nlen: {len(values)}\n{'-' * 80}\n{'#-' * 40}\n"
+        )
     except:
-        print(f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\n{'-' * 80}\n{'#-' * 40}\n")
+        print(
+            f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\n{'-' * 80}\n{'#-' * 40}\n"
+        )
 
 
 @clock
@@ -275,7 +337,7 @@ def get_persist_directory(options):
 
 @clock
 def count_tokens(values):
-    """ 
+    """
     Count the number of tokens
     """
     tokenizer = AutoTokenizer.from_pretrained("google/flan-ul2")

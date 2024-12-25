@@ -149,7 +149,10 @@ def get_llm(options):
         llm = ChatOllama(
             model=options["model"],
             temperature=options["temperature"],
-            callback_manager=CallbackManager([StreamingStdOu  
+            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+        )
+    return llm
+
 
 @clock
 def get_documents_by_path(pathname):

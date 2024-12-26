@@ -189,18 +189,27 @@ def create_memory_vectordb(options):
 @clock
 def create_disk_vectordb(options, index_flag=False):
     """
-    Store the documents in an in-disk vectorstore based on the pathname
+    Store the documents in an in-disk vectorstore based on the pathnamehuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
     documents = get_documents_by_path(options["pathname"])
     embeddings = get_embeddings(options)
     persist_directory = f"{options['persist_directory']}_{options['embedding']}"
-    vectorstore_cls = vectorstore_map[options["vectorstore"]]
-    index = VectorstoreIndexCreator(
-        vectorstore_cls=vectorstore_cls,
-        embedding=embeddings,
-        vectorstore_kwargs={"persist_directory": persist_directory},
-    ).from_documents(documents)
+    vectorstore = options["vectorstore"]
+    vectorstore_cls = vectorstore_map[vectorstore]
+    if vectorstore == "Chroma":
+        index = VectorstoreIndexCreator(
+            vectorstore_cls=vectorstore_cls,
+            embedding=embeddings,
+            vectorstore_kwargs={"persist_directory": persist_directory},
+        ).from_documents(documents)
+    elif vectorstore == "FAISS":
+        index = VectorstoreIndexCreator(
+            vectorstore_cls=vectorstore_cls,
+            embedding=embeddings,
+        ).from_documents(documents)
+        index.vectorstore.save_local(persist_directory)
     if not index_flag:
         vectordb = index.vectorstore
         return vectordb

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kwwutils"
-version = "0.1.12"
+version = "0.1.13"
 description = "General utilities working with Ollama and Langchain"
 authors = ["Kenneth Wong <kennethwork101@gmail.com>"]
 readme = "README.md"

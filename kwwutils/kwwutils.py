@@ -9,22 +9,13 @@ import traceback
 from pprint import pformat
 
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import (
-    CSVLoader,
-    DirectoryLoader,
-    JSONLoader,
-    PyPDFLoader,
-    TextLoader,
-    WebBaseLoader,
-)
-from langchain_community.embeddings import (
-    GPT4AllEmbeddings,
-    HuggingFaceEmbeddings,
-    SentenceTransformerEmbeddings,
-)
+from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
+    WebBaseLoader
+from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceEmbeddings, SentenceTransformerEmbeddings
 from langchain_community.vectorstores import FAISS, DocArrayInMemorySearch
 from langchain_core.callbacks.manager import CallbackManager
 from langchain_ollama import ChatOllama, OllamaLLM
@@ -59,7 +50,7 @@ def clock(func):
                 ", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types)))
             )
         if kwargs:
-            pairs = ["%s=%r" % (k, w) for k, w in sorted(kwargs.items())]
+            pairs = [f"{k}={w}" for k, w in sorted(kwargs.items())]
             arg_list.append(", ".join(pairs))
         arg_str = ", ".join(arg_list)
         print(
@@ -80,11 +71,9 @@ def aclock(func):
         arg_list = []
         arg_types = str, int, float, complex, tuple, list, dict, set
         if args and len(args) > 1:
-            arg_list.append(
-                ", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types)))
-            )
+            arg_list.append(", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types))))
         if kwargs:
-            pairs = ["%s=%r" % (k, w) for k, w in sorted(kwargs.items())]
+            pairs = [f"{k}={w}" for k, w in sorted(kwargs.items())]
             arg_list.append(", ".join(pairs))
         arg_str = ", ".join(arg_list)
         print(

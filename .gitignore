@@ -1,4 +1,7 @@
 __pycache__
+hello.py
+kwwutils.egg-info/
+.python-version
 *bad
 *.db
 *.ipynb

@@ -9,15 +9,20 @@ import traceback
 from pprint import pformat
 
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-
 from langchain.indexes import VectorstoreIndexCreator
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import CSVLoader, DirectoryLoader, JSONLoader, PyPDFLoader, TextLoader, \
-    WebBaseLoader
-from langchain_community.embeddings import GPT4AllEmbeddings, HuggingFaceEmbeddings, SentenceTransformerEmbeddings
+from langchain_community.document_loaders import (
+    CSVLoader,
+    DirectoryLoader,
+    JSONLoader,
+    PyPDFLoader,
+    TextLoader,
+    WebBaseLoader,
+)
+from langchain_community.embeddings import GPT4AllEmbeddings
 from langchain_community.vectorstores import FAISS, DocArrayInMemorySearch
-from langchain_core.callbacks.manager import CallbackManager
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_ollama import ChatOllama, OllamaLLM
 from transformers import AutoTokenizer
 
@@ -71,7 +76,9 @@ def aclock(func):
         arg_list = []
         arg_types = str, int, float, complex, tuple, list, dict, set
         if args and len(args) > 1:
-            arg_list.append(", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types))))
+            arg_list.append(
+                ", ".join(repr(arg) for arg in args if isinstance(arg, (arg_types)))
+            )
         if kwargs:
             pairs = [f"{k}={w}" for k, w in sorted(kwargs.items())]
             arg_list.append(", ".join(pairs))
@@ -87,6 +94,7 @@ def aclock(func):
 
 def execute(func):
     """
+    Note: Used in testing python scripts, not in pytest, to test different models in options dictionary
     Decorator used in executing a function
     options: embedding, model, models, repeatcnt
     """
@@ -132,13 +140,13 @@ def get_llm(options):
         llm = OllamaLLM(
             model=options["model"],
             temperature=options["temperature"],
-            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+            callbacks=[StreamingStdOutCallbackHandler()],
         )
     elif options["llm_type"] == "chat":
         llm = ChatOllama(
             model=options["model"],
             temperature=options["temperature"],
-            callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+            callbacks=[StreamingStdOutCallbackHandler()],
         )
     return llm
 
@@ -260,9 +268,9 @@ def get_embeddings(options):
     embedmodel = options["embedmodel"]
     if embedding == "chroma":
         embedding = (
-            SentenceTransformerEmbeddings()
+            HuggingFaceEmbeddings()
             if embedmodel is None
-            else SentenceTransformerEmbeddings(model_name=embedmodel)
+            else HuggingFaceEmbeddings(model_name=embedmodel)
         )
     elif embedding == "gpt4all":
         embedmodel = "all-MiniLM-L6-v2.gguf2.f16.gguf"
@@ -313,7 +321,7 @@ def _get_documents_by_dir(dir_path):
     for doc in documents:
         docs.extend(doc)
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=2000, chunk_overlap=100, separators=["\n\n", "\n", "\. ", " ", ""]
+        chunk_size=2000, chunk_overlap=100, separators=["\n\n", "\n", "\\. ", " ", ""]
     )
     texts = text_splitter.split_documents(documents=docs)
     return texts

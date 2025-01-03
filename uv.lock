@@ -479,6 +479,28 @@ wheels = [
 ]
 
 [[package]]
+name = "faiss-cpu"
+version = "1.9.0.post1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/03/1f/d0ac8e9d6fc7fc37dc682878f56edb23000c31b74f48cafe9f1a6efaae20/faiss_cpu-1.9.0.post1.tar.gz", hash = "sha256:920725d485aab05dd87d34ef63257332441e9b53d382069f034996465827143a", size = 67799 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/53/c648156001bd66c4310439ed41a45ec0332cde0eb6e33d66352dbc966f24/faiss_cpu-1.9.0.post1-cp312-cp312-macosx_10_14_x86_64.whl", hash = "sha256:ae3fbe0f26c05bef26c626f9e293cc4dd0e685ec02d64100c686276a8c14bf88", size = 7700458 },
+    { url = "https://files.pythonhosted.org/packages/35/b3/3da1d76d931aa5bbabebe78ac2b849931289262e763a01109bfa4fa71e62/faiss_cpu-1.9.0.post1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:3b4d5e79643a09d91d339ba7609fb2e9b3ce6de3cd069b9183e97a843261e0e8", size = 3227854 },
+    { url = "https://files.pythonhosted.org/packages/bd/f7/5ca17c17001bf19e473a816e9e0153af68ab43f32603ceb0c97ed10c1d14/faiss_cpu-1.9.0.post1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5bd1a0412528202e4a4cc38953f81bb7d9b9a783881fa06d822b717a1b090bdd", size = 3651891 },
+    { url = "https://files.pythonhosted.org/packages/00/62/2b174dd024921d04f8d18e9e83285dac46772932164e27a438e6a07263f9/faiss_cpu-1.9.0.post1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d4a499aa20b00266c78b9768de962e6a8dd2e2b2eb3d02aa4c41af4c6913eeba", size = 27471791 },
+    { url = "https://files.pythonhosted.org/packages/60/95/4b2f08400ab7509c989a288abf85fe93215b9da3e236881f22f975d5212b/faiss_cpu-1.9.0.post1-cp312-cp312-win_amd64.whl", hash = "sha256:d6920f2db8581eb6dcd519c024120061d7d68bc075d494e59b1b2af9a1729d03", size = 13845678 },
+    { url = "https://files.pythonhosted.org/packages/d4/58/bb51abeb207ba008b066225dc0c185f51bb93f5588fd2b239550bec6a027/faiss_cpu-1.9.0.post1-cp313-cp313-macosx_10_14_x86_64.whl", hash = "sha256:10e38642c5f147642c4aa8a6c1704fb1900b2b8dd5f33b49a45fa5a67df4837d", size = 7700462 },
+    { url = "https://files.pythonhosted.org/packages/b2/7d/a9203f5b71405308111d2e172b98e5e243059397a8731930310d9471ffae/faiss_cpu-1.9.0.post1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:ec25338fc06fa8aa6ef5c7a2ba9f1aa03f64f9b38ba82402a6495cc981426571", size = 3227854 },
+    { url = "https://files.pythonhosted.org/packages/cd/c7/c7be2eb63c4c1a26380c487070d78ac35e6a409c427c22a38536961188ef/faiss_cpu-1.9.0.post1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2951be3d2713a128e7f625a4b508419238b6c09cce747a0de7708bdcf1b7e3d6", size = 3651917 },
+    { url = "https://files.pythonhosted.org/packages/23/0a/2b93a3cae49bc0e7c1de362ca04f4daf9171fd2cf773c867086a8a5c71cf/faiss_cpu-1.9.0.post1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a6467aafa148d39e6e9bc26c1d84e07f16cbf910297a90ec2e8597cf69772a82", size = 27471814 },
+    { url = "https://files.pythonhosted.org/packages/6c/9b/b9565fe8ee40f665c4d6f926d67a2d00e01e1d2c3c2e873f268b87a9a083/faiss_cpu-1.9.0.post1-cp313-cp313-win_amd64.whl", hash = "sha256:87a224a01a4ad80e0f849b2b2b1fba8b197e5803416ea861faf1b0de255871ea", size = 13845706 },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.115.6"
 source = { registry = "https://pypi.org/simple" }
@@ -886,13 +908,16 @@ wheels = [
 [[package]]
 name = "kwwutils"
 version = "0.1.14"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "bs4" },
+    { name = "faiss-cpu" },
     { name = "gpt4all" },
     { name = "langchain" },
     { name = "langchain-chroma" },
     { name = "langchain-community" },
+    { name = "langchain-faiss" },
+    { name = "langchain-huggingface" },
     { name = "langchain-ollama" },
     { name = "pypdf" },
     { name = "sentence-transformers" },
@@ -927,10 +952,13 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bs4", specifier = ">=0.0.2" },
+    { name = "faiss-cpu", specifier = ">=1.9.0.post1" },
     { name = "gpt4all", specifier = ">=2.8.2" },
     { name = "langchain", specifier = ">=0.3.13" },
     { name = "langchain-chroma", specifier = ">=0.1.4" },
     { name = "langchain-community", specifier = ">=0.3.13" },
+    { name = "langchain-faiss", specifier = ">=0.1.1" },
+    { name = "langchain-huggingface", specifier = ">=0.1.2" },
     { name = "langchain-ollama", specifier = ">=0.2.2" },
     { name = "pypdf", specifier = ">=5.1.0" },
     { name = "sentence-transformers", specifier = ">=3.3.1" },
@@ -1037,6 +1065,31 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/de/f2/1787f9e7fcf6bee70f7a8f488ee95b814408706ab35d61dbba279fbe7361/langchain_core-0.3.28.tar.gz", hash = "sha256:407f7607e6b3c0ebfd6094da95d39b701e22e59966698ef126799782953e7f2c", size = 330743 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9a/bf/07e63d4b4c41aa49daf4a4499e8010928ce8545469f0265544f925c95fff/langchain_core-0.3.28-py3-none-any.whl", hash = "sha256:a02f81ca53a8eed757133797e5a602ca80c1324bbecb0c5d86ef7bd3d6625372", size = 411553 },
+]
+
+[[package]]
+name = "langchain-faiss"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/be/a4afe6fc10b5254da8b18e02c6511493bddd57d49ab9bd3a7efe03b9192d/langchain_faiss-0.1.1.tar.gz", hash = "sha256:8da35aa0fc5a500eb38832ef770d626c167a8fcaf5540bc02ace11214ec1bf37", size = 635 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4b/c3/be79a6ecbeb9344a245b85e2e82165cc40550e78927bd3d5a5e037a917f6/langchain_faiss-0.1.1-py3-none-any.whl", hash = "sha256:e416663ba3bd575f233c6c99b1b3fd1c15e43cf21b2523e01d4528f9fa28f764", size = 1091 },
+]
+
+[[package]]
+name = "langchain-huggingface"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "langchain-core" },
+    { name = "sentence-transformers" },
+    { name = "tokenizers" },
+    { name = "transformers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/0f/8277d993d5307f06523e72c9bc8a505ed028f7b1c1e5276d8e89044b6036/langchain_huggingface-0.1.2.tar.gz", hash = "sha256:4a66d5c449298fd353bd84c9ed01f9bf4303bf2e4ffce14aab8c55c584eee57c", size = 16129 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9d/f8/77a303ddc492f6eed8bf0979f2bc6db4fa6eb1089c5e9f0f977dd87bc9c2/langchain_huggingface-0.1.2-py3-none-any.whl", hash = "sha256:7de5cfcae32bfb6a99c084fc16176f02583a4f8d94febb6bb45bed5b34699174", size = 21251 },
 ]
 
 [[package]]

@@ -14,6 +14,9 @@ dependencies = [
     "gpt4all>=2.8.2",
     "sentence-transformers>=3.3.1",
     "bs4>=0.0.2",
+    "langchain-huggingface>=0.1.2",
+    "faiss-cpu>=1.9.0.post1",
+    "langchain-faiss>=0.1.1",
 ]
 
 [dependency-groups]
@@ -40,3 +43,7 @@ dev = [
     "pytest-xdist>=3.5.0",
     "pytest-xvfb>=3.0.0",
 ]
+
+[build-system] 
+requires = ["setuptools", "wheel"] 
+build-backend = "setuptools.build_meta"

@@ -1,11 +1,20 @@
+import inspect
 import os
 
 import pytest
 from langchain.prompts import ChatPromptTemplate
 
-#from kwwutils.kwwutils import (
-#from kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
-from ..kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
+# from kwwutils.kwwutils import (
+# from kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
+from ..kwwutils import (
+    clock,
+    count_tokens,
+    create_vectordb,
+    get_documents_by_path,
+    get_embeddings,
+    get_llm,
+    printit,
+)
 
 
 @clock
@@ -95,21 +104,37 @@ def test_get_documents_by_path_web(options, model):
     assert docs[0].metadata["source"] == testfile
 
 
+@pytest.mark.testme
+@pytest.mark.parametrize(
+    "vectorstore, vectordb_type",
+    [
+        ("Chroma", "disk"),
+        ("Chroma", "memory"),
+        ("FAISS", "disk"),
+        ("FAISS", "memory"),
+    ],
+)
 @clock
-def test_create_vectordb(options, model):
+def test_create_vectordb(options, model, vectorstore, vectordb_type):
+    name_ = f"{inspect.currentframe().f_code.co_name}"
     printit("options", options)
     printit("model", model)
-    vectordb_type = "disk"
-    #   vectordb_type = "memory"
+    options["vectorstore"] = vectorstore
     options["vectordb_type"] = vectordb_type
     printit("options", options)
     vectordb = create_vectordb(options)
     printit("vectordb", vectordb)
+    print(f"{name_} vectorestore {vectorstore} vectordb_type {vectordb_type}")
+    if vectorstore == "Chroma":
+        documents = vectordb.get(ids=None, include=["documents"])
+        for doc in documents:
+            print(f"{name_} doc", doc)
+    elif vectorstore == "FAISS":
+        num_vectors = vectordb.index.ntotal
+        printit(f"{name_} num_vectors", num_vectors)
 
 
-@pytest.mark.testme
-#@pytest.mark.parametrize("embedding", ["chroma", "gpt4all", "huggingface"])
-@pytest.mark.parametrize("embedding", ["chroma", "gpt4all"])
+@pytest.mark.parametrize("embedding", ["chroma", "gpt4all", "huggingface"])
 @clock
 def test_get_embeddings(options, model, embedding):
     printit("options", options)

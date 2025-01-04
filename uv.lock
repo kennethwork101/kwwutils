@@ -907,7 +907,7 @@ wheels = [
 
 [[package]]
 name = "kwwutils"
-version = "0.1.14"
+version = "0.1.15"
 source = { editable = "." }
 dependencies = [
     { name = "bs4" },
@@ -919,6 +919,7 @@ dependencies = [
     { name = "langchain-faiss" },
     { name = "langchain-huggingface" },
     { name = "langchain-ollama" },
+    { name = "pgvector" },
     { name = "pypdf" },
     { name = "sentence-transformers" },
     { name = "transformers" },
@@ -960,6 +961,7 @@ requires-dist = [
     { name = "langchain-faiss", specifier = ">=0.1.1" },
     { name = "langchain-huggingface", specifier = ">=0.1.2" },
     { name = "langchain-ollama", specifier = ">=0.2.2" },
+    { name = "pgvector", specifier = ">=0.3.6" },
     { name = "pypdf", specifier = ">=5.1.0" },
     { name = "sentence-transformers", specifier = ">=3.3.1" },
     { name = "transformers", specifier = ">=4.47.1" },
@@ -1768,6 +1770,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/17/e9/a3b2ae5f8a852542788ac1f1865dcea0c549cc40af243f42cabfa0acf24d/parse_type-0.6.4.tar.gz", hash = "sha256:5e1ec10440b000c3f818006033372939e693a9ec0176f446d9303e4db88489a6", size = 96480 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d5/b3/f6cc950042bfdbe98672e7c834d930f85920fb7d3359f59096e8d2799617/parse_type-0.6.4-py2.py3-none-any.whl", hash = "sha256:83d41144a82d6b8541127bf212dd76c7f01baff680b498ce8a4d052a7a5bce4c", size = 27442 },
+]
+
+[[package]]
+name = "pgvector"
+version = "0.3.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7d/d8/fd6009cee3e03214667df488cdcf9609461d729968da94e4f95d6359d304/pgvector-0.3.6.tar.gz", hash = "sha256:31d01690e6ea26cea8a633cde5f0f55f5b246d9c8292d68efdef8c22ec994ade", size = 25421 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/81/f457d6d361e04d061bef413749a6e1ab04d98cfeec6d8abcfe40184750f3/pgvector-0.3.6-py3-none-any.whl", hash = "sha256:f6c269b3c110ccb7496bac87202148ed18f34b390a0189c783e351062400a75a", size = 24880 },
 ]
 
 [[package]]

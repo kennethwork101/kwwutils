@@ -1,20 +1,12 @@
 import inspect
 import os
+import shutil
 
 import pytest
 from langchain.prompts import ChatPromptTemplate
+from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
-# from kwwutils.kwwutils import (
-# from kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
-from ..kwwutils import (
-    clock,
-    count_tokens,
-    create_vectordb,
-    get_documents_by_path,
-    get_embeddings,
-    get_llm,
-    printit,
-)
+from ..kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
 
 
 @clock
@@ -104,14 +96,13 @@ def test_get_documents_by_path_web(options, model):
     assert docs[0].metadata["source"] == testfile
 
 
-@pytest.mark.testme
 @pytest.mark.parametrize(
     "vectorstore, vectordb_type",
     [
-        ("Chroma", "disk"),
-        ("Chroma", "memory"),
+        # ("Chroma", "disk"),
+        # ("Chroma", "memory"),
         ("FAISS", "disk"),
-        ("FAISS", "memory"),
+        # ("FAISS", "memory"),
     ],
 )
 @clock
@@ -132,6 +123,84 @@ def test_create_vectordb(options, model, vectorstore, vectordb_type):
     elif vectorstore == "FAISS":
         num_vectors = vectordb.index.ntotal
         printit(f"{name_} num_vectors", num_vectors)
+
+
+@pytest.mark.testme
+@pytest.mark.parametrize(
+    "vectorstore, vectordb_type",
+    [
+        ("Chroma", "disk"),
+        ("Chroma", "memory"),
+        ("FAISS", "disk"),
+        ("FAISS", "memory"),
+    ],
+)
+@clock
+def test_create_vectordb_documents(options, model, vectorstore, vectordb_type):
+    name_ = f"{inspect.currentframe().f_code.co_name}"
+    printit("options", options)
+    printit("model", model)
+    options["vectorstore"] = vectorstore
+    options["vectordb_type"] = vectordb_type
+    printit("options", options)
+    all_docs = []
+    if os.path.isdir(options["persist_directory"]):
+        shutil.rmtree(options["persist_directory"])
+    PYTHON_CODE = """
+    def hello_world():
+        print("Hello, World!")
+    # Call the function
+    hello_world()
+    # class AnswerWithJustification(BaseModel):
+    #     '''An answer to the user question along with justification for the answer.'''
+    #     answer: str
+    #     '''The answer to the user's question'''
+    #     justification: str
+    #     '''Justification for the answer'''
+    # structured_llm = llm.with_structured_output(AnswerWithJustification)
+    # output = structured_llm.invoke("What weighs more, a pound of bricks or a pound of feathers")
+
+    # parser = CommaSeparatedListOutputParser()
+    # items = parser.invoke("apple, banana, cherry")
+    # print(f"items {items}\n")
+    """
+    python_splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.PYTHON, chunk_size=50, chunk_overlap=0
+    )
+    python_docs = python_splitter.create_documents([PYTHON_CODE])
+    all_docs.extend(python_docs)
+    printit(f"{name_} 5 all_docs len:", len(all_docs))
+    printit(f"{name_} 5B all_docs:", all_docs)
+
+    markdown_text = """
+    # LangChain
+    Building applications with LLMs through composability
+    ## Quick Install
+    ```bash
+    pip install langchain
+    ```
+    As an open-source project in a rapidly developing field, we are extremely open to contributions.
+    """
+    md_splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.MARKDOWN, chunk_size=60, chunk_overlap=0
+    )
+    md_docs = md_splitter.create_documents(
+        [markdown_text], [{"source": "https://www.langchain.com"}]
+    )
+    all_docs.extend(md_docs)
+    printit(f"{name_} all_docs len:", len(all_docs))
+    options["documents"] = all_docs
+    vectordb = create_vectordb(options)
+    printit("vectordb", vectordb)
+    print(f"{name_} vectorestore {vectorstore} vectordb_type {vectordb_type}")
+    if vectorstore == "Chroma":
+        vectordata = vectordb.get(ids=None, include=["documents"])
+        printit("vectordata documents len:", len(vectordata["documents"]))
+        ndocuments = len(vectordata["documents"])
+    elif vectorstore == "FAISS":
+        ndocuments = vectordb.index.ntotal
+        printit(f"{name_} ndocuments", ndocuments)
+    assert ndocuments == 25
 
 
 @pytest.mark.parametrize("embedding", ["chroma", "gpt4all", "huggingface"])

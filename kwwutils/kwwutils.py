@@ -176,10 +176,15 @@ def create_memory_vectordb(options):
     Store the documents in an in-mmeory vectorstore based on the pathname
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
-    docs = get_documents_by_path(options["pathname"])
+    # docs = get_documents_by_path(options["pathname"])
+    # Use the documents if provided
+    if "documents" in options:
+        documents = options["documents"]
+    else:
+        documents = get_documents_by_path(options["pathname"])
     embeddings = get_embeddings(options)
     vectorstore = vectorstore_map[options["vectorstore"]]
-    vectordb = vectorstore.from_documents(docs, embeddings)
+    vectordb = vectorstore.from_documents(documents, embeddings)
     return vectordb
 
 
@@ -188,9 +193,13 @@ def create_disk_vectordb(options, index_flag=False):
     """
     Store the documents in an in-disk vectorstore based on the pathnamehuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
 
-    options: embedding, embedmodel, pathname, persist_directory, vectorstore
+    options: embedding, embedmodel, pathname, persist_directory, vectorstore, documents
     """
-    documents = get_documents_by_path(options["pathname"])
+    # Use the documents if provided
+    if "documents" in options:
+        documents = options["documents"]
+    else:
+        documents = get_documents_by_path(options["pathname"])
     embeddings = get_embeddings(options)
     persist_directory = f"{options['persist_directory']}_{options['embedding']}"
     vectorstore = options["vectorstore"]

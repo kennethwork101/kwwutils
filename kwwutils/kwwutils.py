@@ -112,7 +112,7 @@ def execute(func):
             for model in options["models"]:
                 options["model"] = model
                 print(
-                    f"\n\n\n{'='*80}\ni {i}: model: {model} embedding: {options['embedding']}\n{'-'*80}"
+                    f"\n\n\n{'=' * 80}\ni {i}: model: {model} embedding: {options['embedding']}\n{'-' * 80}"
                 )
                 try:
                     t0 = time.time()
@@ -123,7 +123,7 @@ def execute(func):
                     traceback.print_exception(type(e), e, e.__traceback__)
                     result = None
                 print(
-                    f"\n{'-'*80}\ni {i}: model: {model} embedding: {options['embedding']} {elapsed} seconds\n{'='*80}\n\n\n"
+                    f"\n{'-' * 80}\ni {i}: model: {model} embedding: {options['embedding']} {elapsed} seconds\n{'=' * 80}\n\n\n"
                 )
         return result
 
@@ -176,8 +176,6 @@ def create_memory_vectordb(options):
     Store the documents in an in-mmeory vectorstore based on the pathname
     options: embedding, embedmodel, pathname, persist_directory, vectorstore
     """
-    # docs = get_documents_by_path(options["pathname"])
-    # Use the documents if provided
     if "documents" in options:
         documents = options["documents"]
     else:
@@ -339,11 +337,11 @@ def _get_documents_by_dir(dir_path):
 def printit(label, values):
     try:
         print(
-            f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\nlen: {len(values)}\n{'-' * 80}\n{'#-' * 40}\n"
+            f"\n{'#' * 80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\nlen: {len(values)}\n{'-' * 80}\n{'#-' * 40}\n"
         )
     except:
         print(
-            f"\n{'#'*80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\n{'-' * 80}\n{'#-' * 40}\n"
+            f"\n{'#' * 80}\n{'-' * 80}\nlabel: >>>{label}<<<:\nvalues: >>>>>>{str(pformat(values))}<<<<<<\n{'-' * 80}\n{'#-' * 40}\n"
         )
 
 

@@ -6,7 +6,15 @@ import pytest
 from langchain.prompts import ChatPromptTemplate
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
-from ..kwwutils import clock, count_tokens, create_vectordb, get_documents_by_path, get_embeddings, get_llm, printit
+from ..kwwutils import (
+    clock,
+    count_tokens,
+    create_vectordb,
+    get_documents_by_path,
+    get_embeddings,
+    get_llm,
+    printit,
+)
 
 
 @clock
